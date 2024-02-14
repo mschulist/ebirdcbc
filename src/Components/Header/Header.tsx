@@ -72,11 +72,11 @@ export default function Header() {
         3.) Sign into your account when the window open. Do not touch the chrome
         window while it collects the tracks. <br></br>
         3.) Navigate to the points and click on them to see the species and
-        notes. Select the 'group' status for each point to group overlapping
+        notes. Select the &lsquo;group&rsquo; status for each point to group overlapping
         points together.<br></br>
         4.) Species Mode allows you to go species by species when grouping
         checklists. <br></br>
-        5.) Click "Get Species" to get the species from the database and compile
+        5.) Click &lsquo;&lsquo;Get Species&rsquo;&rsquo; to get the species from the database and compile
         them into a CSV file that will download.<br></br>
       </div>
       <div className="flex-1">
