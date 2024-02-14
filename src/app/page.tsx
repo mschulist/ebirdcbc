@@ -1,8 +1,8 @@
+import Compiler from "@/Components/Compiler/Compiler";
 import Header from "@/Components/Header/Header";
-import Image from "next/image";
 
-export default function Home() {
+export default function Page() {
   return (
-    <Header/>
+    <Compiler/>
   )
 }

@@ -3,15 +3,29 @@
 import axios from "axios";
 import React, { use, useState } from "react";
 import getPoints from "@/Utils/getPoints";
+import downloadSpecies from "@/Utils/downloadSpecies";
+import "./Header.css";
 
-export default function Header() {
-  const [checklists, setChecklists] = useState<string>("");
-  const [species, setSpecies] = useState<any>({});
-  const [speciesWithCountsStr, setSpeciesWithCounts] = useState<String[]>([]);
-  const [markerColors, setMarkerColors] = useState<any>({});
-  const [speciesMode, setSpeciesMode] = useState<boolean>(false);
-  const [deps, setDeps] = useState<any>({});
-  const [markers, setPoints] = useState<any[][]>([]);
+export interface HeaderProps {
+    setChecklists: (value: string) => void;
+    setSpecies: (value: any) => void;
+    setSpeciesWithCounts: (value: String[]) => void;
+    setMarkerColors: (value: any) => void;
+    setSpeciesMode: (value: boolean) => void;
+    setDeps: (value: any) => void;
+    setPoints: (value: any[][]) => void;
+    setSpeciesForView: (value: string) => void;
+    checklists: string;
+    species: any;
+    speciesWithCountsStr: String[];
+    markerColors: any;
+    speciesMode: boolean;
+    deps: any;
+    markers: any[][];
+    speciesForView: string;
+    }
+
+export default function Header({setChecklists = () => {}, setSpecies = () => {}, setSpeciesWithCounts = () => {}, setMarkerColors = () => {}, setSpeciesMode = () => {}, setDeps = () => {}, setPoints = () => {}, setSpeciesForView = () => {}, checklists, species, speciesWithCountsStr, markerColors, speciesMode, deps, markers, speciesForView}: HeaderProps) {
 
   async function findChecklists() {
     let response: String[];
@@ -106,6 +120,15 @@ export default function Header() {
           Clear
         </button>
       </div>
+      <div className="flex-1">
+        <button onClick={getPoints}>Get Points</button>
+        <button onClick={downloadSpecies}>Get Species</button>
+        <input type="checkbox" checked={speciesMode} onChange={() => setSpeciesMode(!speciesMode)} />
+        <label>Species Mode</label>
+        {speciesMode && 
+            <p>Total for {speciesForView}: {species[speciesForView]}</p>}
+        
+    </div>
     </div>
   );
 }
