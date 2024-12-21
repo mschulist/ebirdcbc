@@ -4,7 +4,7 @@ import distinctcolors from "distinct-colors";
 import zip from "lodash/zip";
 import listSpecies from "@/Utils/listSpecies";
 
-interface EbirdCode {
+export interface EbirdCode {
   [key: string]: string;
 }
 

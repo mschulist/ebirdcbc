@@ -2,9 +2,12 @@
 
 import axios from "axios";
 import React, { use, useState } from "react";
-import Map from "@/Components/Map/Map";
+// import Map from "@/Components/Map/Map";
 import Header from "@/Components/Header/Header";
+import dynamic from "next/dynamic";
 import Head from "next/head";
+
+const Map = dynamic(() => import("@/Components/Map/Map"), { ssr: false });
 
 export default function Compiler() {
   const [checklists, setChecklists] = useState<string>("");
@@ -15,13 +18,14 @@ export default function Compiler() {
   const [deps, setDeps] = useState<any>({});
   const [markers, setPoints] = useState<any[][]>([]);
   const [speciesForView, setSpeciesForView] = useState<string>("");
+  const [speciesMarkers, setSpeciesMarkers] = useState([]);
 
   console.log(speciesMode);
 
   return (
     <>
-      <div className="flex-col h-screen">
-        <div className="flex-1">
+      <div className="flex-col h-screen flex">
+        <div className="flex-none">
           <Header
             setChecklists={setChecklists}
             checklists={checklists}
@@ -41,8 +45,18 @@ export default function Compiler() {
             speciesForView={speciesForView}
           />
         </div>
-        <div className="flex-1 h-full">
-          <Map />
+        <div className="flex-1">
+          <Map
+            setDeps={setDeps}
+            setSpeciesForView={setSpeciesForView}
+            markers={markers}
+            speciesForView={speciesForView}
+            setMarkerColors={setMarkerColors}
+            markerColors={markerColors}
+            speciesMode={speciesMode}
+            speciesMarkers={speciesMarkers}
+            setSpeciesMarkers={setSpeciesMarkers}
+          />
         </div>
       </div>
     </>
