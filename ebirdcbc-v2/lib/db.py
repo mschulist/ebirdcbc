@@ -144,3 +144,14 @@ class CBCDB:
 
         species = [Species(**dat) for dat in data]
         return species
+
+    def update_species_group(self, species_id: int, new_group: int):
+        """
+        Update the group given the species id
+        """
+        (
+            self.supabase.table(SPECIES_TABLE_NAME)
+            .update({"group_number": new_group})
+            .eq("id", species_id)
+            .execute()
+        )
