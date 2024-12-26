@@ -8,6 +8,8 @@ import { getServerRequest } from '@/networking/server_requests'
 import DeckGL, { PickingInfo } from 'deck.gl'
 import { getCurrentProject } from '../navigation/ProjectSelector'
 import { PopupModal } from './PopupModal'
+import { SpeciesModeCheckbox } from './SpeciesModeCheckbox'
+import { SpeciesSelector } from './SpeciesSelector'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'get_your_own_key'
 
@@ -27,12 +29,21 @@ function getTooltip({ object }: PickingInfo<Checklist>) {
 
 export function Mapbox() {
   const [checklists, setChecklists] = useState<Checklist[]>([])
+  const [species, setSpecies] = useState<Species[]>([])
   const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(
     null
   )
+  const [speciesMode, setSpeciesMode] = useState<boolean>(false)
+  const [selectedSpecies, setSelectedSpecies] = useState<string>()
 
   useEffect(() => {
-    fetchChecklists().then((checklists) => setChecklists(checklists))
+    fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
+      const checklists = checklistsAndSpecies.checklists
+      const species = checklistsAndSpecies.species
+      setChecklists(checklists)
+      setSpecies(species)
+      setSelectedSpecies(species[0].species_code)
+    })
   }, [])
 
   function openModal() {
@@ -51,12 +62,27 @@ export function Mapbox() {
   )
 
   return (
-    <div className='h-5/6'>
+    <div className='h-5/6 relative'>
+      <div className='absolute top-2 left-4 z-10'>
+        <SpeciesModeCheckbox
+          speciesMode={speciesMode}
+          toggleSpeciesMode={() => setSpeciesMode(!speciesMode)}
+        />
+        <div className='absolute top-2 left-36 z-10'>
+          {speciesMode && selectedSpecies && (
+            <SpeciesSelector
+              selectedSpecies={selectedSpecies}
+              setSelectedSpecies={setSelectedSpecies}
+              species={species}
+            />
+          )}
+        </div>
+      </div>
       <DeckGL
         initialViewState={{
           longitude: -122.4,
           latitude: 37.8,
-          zoom: 14,
+          zoom: 11,
         }}
         layers={layers}
         controller={selectedChecklist ? false : true}
@@ -81,7 +107,7 @@ export function Mapbox() {
   )
 }
 
-export async function fetchChecklists() {
+export async function fetchChecklistsAndSpecies() {
   const projectId = getCurrentProject()?.id
   const response = await getServerRequest(
     `get_checklists_and_species?project_id=${projectId}`
@@ -101,7 +127,9 @@ export async function fetchChecklists() {
         }
       }
     )
-    return checklists as Checklist[]
+    const checks = checklists as Checklist[]
+    const specs = species as Species[]
+    return { checklists: checks, species: specs }
   }
   throw new Error('Failed to fetch checklists')
 }

@@ -22,7 +22,7 @@ export type ChecklistResponse = {
 export type Species = {
   id: number
   checklist_id: number
-  species_code: number
+  species_code: string
   comments: string | null
   count: number
   group_number: number

@@ -11,11 +11,11 @@ import { useRouter } from 'next/navigation'
 export function ChooseProject() {
   const [projects, setProjects] = useState<Project[]>([])
 
-  useEffect(() => {
-    fetchProjects().then((projects) => setProjects(projects))
-  }, [])
-
   const router = useRouter()
+
+  useEffect(() => {
+    fetchProjects(router).then((projects) => setProjects(projects))
+  }, [router])
 
   return (
     <div className='dropdown'>

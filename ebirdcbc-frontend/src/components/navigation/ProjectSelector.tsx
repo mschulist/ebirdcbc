@@ -1,6 +1,8 @@
 'use client'
 
 import { postServerRequest } from '@/networking/server_requests'
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export const CURRENT_PROJECT_KEY = 'current_project'
@@ -9,10 +11,12 @@ export function ProjectSelector() {
   const [projects, setProjects] = useState<Project[]>([])
   const [currentProject, setCurrentProject] = useState<Project | null>(null)
 
+  const router = useRouter()
+
   useEffect(() => {
-    fetchProjects().then((projects) => setProjects(projects))
+    fetchProjects(router).then((projects) => setProjects(projects))
     setCurrentProject(getCurrentProject())
-  }, [])
+  }, [router])
 
   return (
     <div className='dropdown'>
@@ -54,10 +58,11 @@ export function setProject(project: Project) {
   localStorage.setItem(CURRENT_PROJECT_KEY, JSON.stringify(project))
 }
 
-export async function fetchProjects() {
+export async function fetchProjects(router: AppRouterInstance) {
   const response = await postServerRequest('my_projects', {})
   if (response.ok) {
     return response.json()
   }
-  throw new Error('Failed to fetch projects')
+  router.push('/login')
+  return []
 }
