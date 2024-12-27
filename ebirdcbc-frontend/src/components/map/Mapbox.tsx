@@ -1,15 +1,16 @@
 'use client'
 
 import Map from 'react-map-gl/maplibre'
-import { getTrackLayers } from './tracks'
+import { getSpeciesModeTrackLayers, getTrackLayers } from './tracks'
 import { Checklist, ChecklistResponse, Species } from '@/models/ebird'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getServerRequest } from '@/networking/server_requests'
-import DeckGL, { PickingInfo } from 'deck.gl'
+import DeckGL, { PathLayer, PickingInfo } from 'deck.gl'
 import { getCurrentProject } from '../navigation/ProjectSelector'
-import { PopupModal } from './PopupModal'
+import { ChecklistPopupModal } from './ChecklistPopupModal'
 import { SpeciesModeCheckbox } from './SpeciesModeCheckbox'
 import { SpeciesSelector } from './SpeciesSelector'
+import { SpeciesPopupModal } from './SpeciesPopupModal'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'get_your_own_key'
 
@@ -35,6 +36,7 @@ export function Mapbox() {
   )
   const [speciesMode, setSpeciesMode] = useState<boolean>(false)
   const [selectedSpecies, setSelectedSpecies] = useState<string>()
+  const [speciesModeLayers, setSpeciesModeLayers] = useState<PathLayer[]>([])
 
   useEffect(() => {
     fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
@@ -46,13 +48,13 @@ export function Mapbox() {
     })
   }, [])
 
-  function openModal() {
+  const openModal = useCallback(() => {
     const modal = document.getElementById('modal')
     if (modal) {
       const m = modal as HTMLDialogElement
       m.showModal()
     }
-  }
+  }, [])
 
   const layers = getTrackLayers(
     checklists,
@@ -61,22 +63,40 @@ export function Mapbox() {
     selectedChecklist
   )
 
+  useEffect(() => {
+    if (selectedSpecies) {
+      const layers = getSpeciesModeTrackLayers(
+        checklists,
+        selectedSpecies,
+        openModal,
+        selectedChecklist,
+        setSelectedChecklist
+      )
+      setSpeciesModeLayers(layers)
+    }
+  }, [selectedSpecies, openModal])
+
   return (
     <div className='h-5/6 relative'>
-      <div className='absolute top-2 left-4 z-10'>
+      <div className='absolute top-2 left-4 z-10 flex space-y-2 gap-4 items-baseline'>
         <SpeciesModeCheckbox
           speciesMode={speciesMode}
           toggleSpeciesMode={() => setSpeciesMode(!speciesMode)}
         />
-        <div className='absolute top-2 left-36 z-10'>
-          {speciesMode && selectedSpecies && (
-            <SpeciesSelector
-              selectedSpecies={selectedSpecies}
-              setSelectedSpecies={setSelectedSpecies}
-              species={species}
-            />
-          )}
-        </div>
+        {speciesMode && selectedSpecies && (
+          <div className='flex flex-col space-y-2'>
+            <div className='flex items-center space-x-2'>
+              <SpeciesSelector
+                selectedSpecies={selectedSpecies}
+                setSelectedSpecies={setSelectedSpecies}
+                species={species}
+              />
+              <span className='text-black text-lg'>
+                Selected Species: {selectedSpecies}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
       <DeckGL
         initialViewState={{
@@ -84,7 +104,7 @@ export function Mapbox() {
           latitude: 37.8,
           zoom: 11,
         }}
-        layers={layers}
+        layers={!speciesMode ? layers : speciesModeLayers}
         controller={selectedChecklist ? false : true}
         pickingRadius={10}
         getTooltip={getTooltip}
@@ -97,10 +117,19 @@ export function Mapbox() {
           }}
           mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=${MAPBOX_TOKEN}`}
         >
-          <PopupModal
-            selectedChecklist={selectedChecklist}
-            setSelectedChecklist={setSelectedChecklist}
-          />
+          {!speciesMode ? (
+            <ChecklistPopupModal
+              selectedChecklist={selectedChecklist}
+              setSelectedChecklist={setSelectedChecklist}
+            />
+          ) : (
+            <SpeciesPopupModal
+              selectedChecklist={selectedChecklist}
+              setSelectedChecklist={setSelectedChecklist}
+              selectedSpecies={selectedSpecies}
+              fetchChecklists={() => fetchChecklistsAndSpecies()}
+            />
+          )}
         </Map>
       </DeckGL>
     </div>

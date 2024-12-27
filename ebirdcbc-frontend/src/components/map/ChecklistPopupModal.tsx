@@ -3,12 +3,12 @@
 import { Checklist } from '@/models/ebird'
 import { ChecklistBox } from './Checklist'
 
-type PopupModalProps = {
+type ChecklistPopupModalProps = {
   selectedChecklist: Checklist | null
   setSelectedChecklist: (building: Checklist | null) => void
 }
 
-export function PopupModal(props: PopupModalProps) {
+export function ChecklistPopupModal(props: ChecklistPopupModalProps) {
   return (
     <dialog
       id='modal'
