@@ -56,6 +56,12 @@ export function getSpeciesModeTrackLayers(
       checklist.species.some((s) => s.species_code === selectedSpecies)
     )
     .map((checklist, i) => {
+      const speciesGroup = checklist.species.find(
+        (species) => species.species_code === selectedSpecies
+      )?.group_number
+
+      if (!speciesGroup) throw new Error('Species group not found')
+
       return new PathLayer({
         id: `line-layer-${i}`,
         data: [checklist],
@@ -69,7 +75,7 @@ export function getSpeciesModeTrackLayers(
           ])
           return path
         },
-        getColor: colors[i].rgb(),
+        getColor: colors[speciesGroup].rgb(),
         getWidth: 15,
         pickable: true,
         onClick: (pickingInfo) => {

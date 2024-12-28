@@ -26,9 +26,8 @@ async def add_checklists_information(
 
     tracks_map = await get_track(ebird_username, ebird_password, checklist_ids)
 
+    preexisting_checklists = db.get_preexisting_checklists_count(project.id)
     for i, checklist in enumerate(checklist_ids):
-        preexisting_checklists = db.get_preexisting_checklists_count(project.id)
-
         checklist_info, location_info = ebird_api_checklist(checklist, api_key)
         track = tracks_map.get(checklist, None)
 
