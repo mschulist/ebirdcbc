@@ -32,10 +32,14 @@ export function SpeciesPopupModal(props: SpeciesPopupModalProps) {
     >
       <div className='modal-box md:max-w-[75vw] max-w-[90vw] p-1 md:p-6 z-100'>
         {checklistWithSingleSpecies && (
-          <div>
+          <div className='flex flex-col gap-3'>
             <span className='text-2xl'>
               {checklistWithSingleSpecies.location_name}
             </span>
+            <div>
+              <span className='text-green-400'>Comments: </span>
+              <span>{checklistWithSingleSpecies.comments}</span>
+            </div>
             {checklistWithSingleSpecies.species[0] &&
               props.selectedChecklist && (
                 <>

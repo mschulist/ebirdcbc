@@ -3,6 +3,8 @@ from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+import io
 from .lib.models import Token, User, UserResponse
 from .lib.auth import (
     authenticate_user,
@@ -155,4 +157,27 @@ async def get_summary(
 
     summary = create_species_summary(species)
 
-    print(summary)
+    return summary.to_dicts()
+
+
+@app.post("get_summary_csv")
+async def get_summary_csv(
+    project_id: Annotated[int, Depends(authorize_project_access)],
+):
+    """
+    Get the final output summary for the project
+    """
+
+    checklists = db.get_checklists_by_project_id(project_id)
+    checklist_ids = [
+        checklist.id for checklist in checklists if checklist.id is not None
+    ]
+    species = db.get_species_by_checklist_ids(checklist_ids)
+
+    summary = create_species_summary(species)
+
+    stream = io.StringIO()
+    summary.write_csv(stream)
+    response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=cbc_summary.csv"
+    return response

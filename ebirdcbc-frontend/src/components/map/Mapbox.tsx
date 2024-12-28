@@ -5,7 +5,7 @@ import { getSpeciesModeTrackLayers, getTrackLayers } from './tracks'
 import { Checklist, ChecklistResponse, Species } from '@/models/ebird'
 import { useState, useEffect, useCallback } from 'react'
 import { getServerRequest } from '@/networking/server_requests'
-import DeckGL, { PathLayer, PickingInfo } from 'deck.gl'
+import DeckGL, { IconLayer, PathLayer, PickingInfo, TextLayer } from 'deck.gl'
 import { getCurrentProject } from '../navigation/ProjectSelector'
 import { ChecklistPopupModal } from './ChecklistPopupModal'
 import { SpeciesModeCheckbox } from './SpeciesModeCheckbox'
@@ -36,7 +36,9 @@ export function Mapbox() {
   )
   const [speciesMode, setSpeciesMode] = useState<boolean>(false)
   const [selectedSpecies, setSelectedSpecies] = useState<string>()
-  const [speciesModeLayers, setSpeciesModeLayers] = useState<PathLayer[]>([])
+  const [speciesModeLayers, setSpeciesModeLayers] = useState<
+    (PathLayer | IconLayer | TextLayer)[]
+  >([])
 
   useEffect(() => {
     fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
@@ -74,7 +76,16 @@ export function Mapbox() {
       )
       setSpeciesModeLayers(layers)
     }
-  }, [selectedSpecies, openModal])
+  }, [selectedSpecies, openModal, selectedChecklist, checklists])
+
+  function handleUpdateGroup() {
+    fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
+      const checklists = checklistsAndSpecies.checklists
+      const species = checklistsAndSpecies.species
+      setChecklists(checklists)
+      setSpecies(species)
+    })
+  }
 
   return (
     <div className='h-5/6 relative'>
@@ -127,7 +138,7 @@ export function Mapbox() {
               selectedChecklist={selectedChecklist}
               setSelectedChecklist={setSelectedChecklist}
               selectedSpecies={selectedSpecies}
-              fetchChecklists={() => fetchChecklistsAndSpecies()}
+              fetchChecklists={handleUpdateGroup}
             />
           )}
         </Map>

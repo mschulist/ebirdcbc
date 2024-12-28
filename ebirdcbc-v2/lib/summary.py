@@ -17,4 +17,4 @@ def create_species_summary(species: List[Species]):
         .group_by(["species_code"])
         .agg(pl.col("count").sum())
     )
-    return grouped_species.to_dicts()
+    return grouped_species
