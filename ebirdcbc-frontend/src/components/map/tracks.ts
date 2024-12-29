@@ -79,15 +79,15 @@ export function getSpeciesModeTrackLayers(
 
   const layers = checklists
     .filter((checklist) =>
-      checklist.species.some((s) => s.species_code === selectedSpecies)
+      checklist.species.some((s) => s.species_name === selectedSpecies)
     )
     .map((checklist, i) => {
       const speciesGroup = checklist.species.find(
-        (species) => species.species_code === selectedSpecies
+        (species) => species.species_name === selectedSpecies
       )?.group_number
 
       const speciesCount = checklist.species.find(
-        (species) => species.species_code === selectedSpecies
+        (species) => species.species_name === selectedSpecies
       )?.count
 
       if (!speciesGroup) throw new Error('Species group not found')
@@ -146,12 +146,17 @@ export function getSpeciesModeTrackLayers(
             data: [checklist],
             getPosition: (check: Checklist) => {
               if (!check.track_points) {
-                return [check.location_coords[1], check.location_coords[0]]
+                return [
+                  check.location_coords[1],
+                  check.location_coords[0],
+                  0.001,
+                ]
               }
               const midIndex = Math.floor(check.track_points.length / 2)
               return [
                 check.track_points[midIndex][1],
                 check.track_points[midIndex][0],
+                0.001,
               ]
             },
             getText: () => speciesCount?.toString() || '',

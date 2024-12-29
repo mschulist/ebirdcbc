@@ -7,6 +7,10 @@ export type Checklist = {
   comments: string
   track_points: number[][] | null
   species: Species[]
+  datetime: string | null
+  num_observers: number | null
+  duration_hr: number | null
+  distance_km: number | null
 }
 
 export type ChecklistResponse = {
@@ -26,4 +30,6 @@ export type Species = {
   comments: string | null
   count: number
   group_number: number
+  species_name: string
+  taxon_order: number
 }

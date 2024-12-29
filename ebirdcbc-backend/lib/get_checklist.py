@@ -42,6 +42,10 @@ async def add_checklists_information(
             comments=checklist_info["comments"],
             track_points=track,
             checklist_id=checklist,
+            distance_km=checklist_info.get("effortDistanceKm", None),
+            duration_hr=checklist_info.get("durationHrs", None),
+            datetime=checklist_info.get("obsDt", None),
+            num_observers=checklist_info.get("numObservers", None),
         )
         checklist_id = db.add_checklist(check)
 

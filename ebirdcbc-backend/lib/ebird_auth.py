@@ -6,7 +6,7 @@ import os
 from cryptography.fernet import Fernet
 
 
-secret_key = (os.getenv("SECRET_KEY") or "test_key")
+secret_key = os.getenv("SECRET_KEY") or "test_key"
 
 
 def encrypt_password(plain_password: str):

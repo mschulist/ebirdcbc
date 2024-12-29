@@ -14,7 +14,7 @@ type GroupSelectorProps = {
 
 export function GroupSelector(props: GroupSelectorProps) {
   const species = props.checklist.species.find(
-    (species) => species.species_code === props.selectedSpecies
+    (species) => species.species_name === props.selectedSpecies
   )
 
   const [selectedGroup, setSelectedGroup] = useState<number>(
@@ -36,7 +36,7 @@ export function GroupSelector(props: GroupSelectorProps) {
   }
 
   return (
-    <div className='flex flex-row justify-between w-full p-2'>
+    <div className='flex flex-row justify-evenly w-full p-2 flex-wrap'>
       {groups.map((group) => (
         <button
           key={group}

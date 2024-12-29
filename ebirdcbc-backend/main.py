@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -16,6 +16,7 @@ from .lib.db import CBCDB
 from .lib.trip_report import get_trip_report_checklists
 from .lib.get_checklist import add_checklists_information
 from .lib.summary import create_species_summary
+from .lib.taxon import add_order_and_species
 import os
 
 
@@ -129,7 +130,9 @@ async def get_checklists_and_species(
     ]
     species = db.get_species_by_checklist_ids(checklist_ids)
 
-    return {"checklists": checklists, "species": species}
+    species_with_tax_info = add_order_and_species(species)
+
+    return {"checklists": checklists, "species": species_with_tax_info}
 
 
 @app.post("/update_species_group")
@@ -160,13 +163,15 @@ async def get_summary(
     return summary.to_dicts()
 
 
-@app.post("get_summary_csv")
+@app.post("/get_summary_csv")
 async def get_summary_csv(
     project_id: Annotated[int, Depends(authorize_project_access)],
 ):
     """
     Get the final output summary for the project
     """
+
+    project = db.get_project(project_id)
 
     checklists = db.get_checklists_by_project_id(project_id)
     checklist_ids = [
@@ -179,5 +184,7 @@ async def get_summary_csv(
     stream = io.StringIO()
     summary.write_csv(stream)
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
-    response.headers["Content-Disposition"] = "attachment; filename=cbc_summary.csv"
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename=cbc_summary_{project.name}_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.csv"
+    )
     return response

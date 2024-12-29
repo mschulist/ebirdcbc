@@ -1,10 +1,9 @@
 'use client'
 
-import { Species } from '@/models/ebird'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 
 type SpeciesSelectorProps = {
-  species: Species[]
+  uniqueSpecies: string[]
   setSelectedSpecies: (species: string) => void
   selectedSpecies: string
 }
@@ -15,17 +14,24 @@ export function SpeciesSelector(props: SpeciesSelectorProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const uniqueSpecies = Array.from(
-    new Set(props.species.map((species) => species.species_code))
+  const memoizedUniqueSpecies = useMemo(
+    () => props.uniqueSpecies,
+    [props.uniqueSpecies]
   )
 
   useEffect(() => {
     setFilteredSpecies(
-      uniqueSpecies.filter((species_code) =>
-        species_code.toLowerCase().includes(searchText.toLowerCase())
+      memoizedUniqueSpecies.filter((species_name) =>
+        species_name.toLowerCase().includes(searchText.toLowerCase())
       )
     )
-  }, [searchText])
+  }, [searchText, memoizedUniqueSpecies])
+
+  useEffect(() => {
+    if (props.selectedSpecies) {
+      setSearchText(props.selectedSpecies)
+    }
+  }, [props.selectedSpecies])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

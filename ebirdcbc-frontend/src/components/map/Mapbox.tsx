@@ -9,8 +9,8 @@ import DeckGL, { IconLayer, PathLayer, PickingInfo, TextLayer } from 'deck.gl'
 import { getCurrentProject } from '../navigation/ProjectSelector'
 import { ChecklistPopupModal } from './ChecklistPopupModal'
 import { SpeciesModeCheckbox } from './SpeciesModeCheckbox'
-import { SpeciesSelector } from './SpeciesSelector'
 import { SpeciesPopupModal } from './SpeciesPopupModal'
+import { SpeciesSelectorWithLabel } from './SpeciesModeSelector'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'get_your_own_key'
 
@@ -46,7 +46,7 @@ export function Mapbox() {
       const species = checklistsAndSpecies.species
       setChecklists(checklists)
       setSpecies(species)
-      setSelectedSpecies(species[0].species_code)
+      setSelectedSpecies(species[0].species_name)
     })
   }, [])
 
@@ -76,7 +76,7 @@ export function Mapbox() {
       )
       setSpeciesModeLayers(layers)
     }
-  }, [selectedSpecies, openModal, selectedChecklist, checklists])
+  }, [selectedSpecies, openModal, selectedChecklist, checklists, speciesMode])
 
   function handleUpdateGroup() {
     fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
@@ -95,18 +95,11 @@ export function Mapbox() {
           toggleSpeciesMode={() => setSpeciesMode(!speciesMode)}
         />
         {speciesMode && selectedSpecies && (
-          <div className='flex flex-col space-y-2'>
-            <div className='flex items-center space-x-2'>
-              <SpeciesSelector
-                selectedSpecies={selectedSpecies}
-                setSelectedSpecies={setSelectedSpecies}
-                species={species}
-              />
-              <span className='text-black text-lg'>
-                Selected Species: {selectedSpecies}
-              </span>
-            </div>
-          </div>
+          <SpeciesSelectorWithLabel
+            selectedSpecies={selectedSpecies}
+            setSelectedSpecies={setSelectedSpecies}
+            species={species}
+          />
         )}
       </div>
       <DeckGL
@@ -116,7 +109,13 @@ export function Mapbox() {
           zoom: 11,
         }}
         layers={!speciesMode ? layers : speciesModeLayers}
-        controller={selectedChecklist ? false : true}
+        controller={{
+          dragRotate: false,
+          dragPan: selectedChecklist ? false : true,
+          scrollZoom: selectedChecklist ? false : true,
+          touchRotate: false,
+          touchZoom: selectedChecklist ? false : true,
+        }}
         pickingRadius={10}
         getTooltip={getTooltip}
       >

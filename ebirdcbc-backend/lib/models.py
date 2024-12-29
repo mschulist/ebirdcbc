@@ -10,6 +10,10 @@ class Checklist(BaseModel):
     location_coords: List[float]
     comments: str
     track_points: Optional[List[Tuple[float, float]]]
+    datetime: str | None
+    num_observers: int
+    duration_hr: float | None
+    distance_km: float | None
 
 
 class Species(BaseModel):
