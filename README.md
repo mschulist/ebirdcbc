@@ -1,1 +1,0 @@
-The new ebirdcbc using nextjs
