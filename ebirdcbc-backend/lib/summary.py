@@ -1,14 +1,15 @@
 from typing import List
 from .models import Species
 import polars as pl
+from pathlib import Path
 
 
 def create_species_summary(species: List[Species]):
     """
     Given a list of species, create the output summary
     """
-
-    taxon = pl.read_csv("data/eBird_taxonomy_v2024.csv").select(
+    taxon_filepath = Path(__file__).parent.parent / "data" / "eBird_taxonomy_v2024.csv"
+    taxon = pl.read_csv(taxon_filepath).select(
         pl.col("SPECIES_CODE"),
         pl.col("TAXON_ORDER"),
         pl.col("PRIMARY_COM_NAME"),
