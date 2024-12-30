@@ -90,7 +90,9 @@ export function getSpeciesModeTrackLayers(
         (species) => species.species_name === selectedSpecies
       )?.count
 
-      if (!speciesGroup) throw new Error('Species group not found')
+      if (speciesGroup == undefined || speciesCount == undefined) {
+        throw new Error('Species group not found')
+      }
 
       switch (true) {
         case !checklist.track_points:
