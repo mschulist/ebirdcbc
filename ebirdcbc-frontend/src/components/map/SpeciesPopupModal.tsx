@@ -1,4 +1,4 @@
-import { Checklist } from '@/models/ebird'
+import { Checklist, Species } from '@/models/ebird'
 import { SingleSpecies } from './SingleSpecies'
 import { GroupSelector } from './GroupSelector'
 
@@ -6,7 +6,7 @@ type SpeciesPopupModalProps = {
   selectedChecklist: Checklist | null
   setSelectedChecklist: (building: Checklist | null) => void
   selectedSpecies: string | undefined
-  fetchChecklists: () => void
+  handleUpdateGroup: (species: Species, newGroup: number) => void
 }
 
 const NUM_GROUPS = 10
@@ -84,7 +84,7 @@ export function SpeciesPopupModal(props: SpeciesPopupModalProps) {
                     maxGroups={NUM_GROUPS}
                     checklist={props.selectedChecklist}
                     selectedSpecies={props.selectedSpecies}
-                    fetchChecklists={props.fetchChecklists}
+                    handleUpdateGroup={props.handleUpdateGroup}
                   />
                   <SingleSpecies
                     species={checklistWithSingleSpecies.species[0]}

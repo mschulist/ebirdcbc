@@ -5,6 +5,7 @@ type SpeciesSelectorWithLabelProps = {
   selectedSpecies: string
   setSelectedSpecies: (species: string) => void
   species: Species[]
+  totalForCurrentSpecies: number
 }
 
 export function SpeciesSelectorWithLabel(props: SpeciesSelectorWithLabelProps) {
@@ -48,6 +49,9 @@ export function SpeciesSelectorWithLabel(props: SpeciesSelectorWithLabelProps) {
         </button>
         <span className='text-black text-lg'>
           Selected Species: {props.selectedSpecies}
+        </span>
+        <span className='text-black text-lg'>
+          ({props.totalForCurrentSpecies})
         </span>
       </div>
     </div>

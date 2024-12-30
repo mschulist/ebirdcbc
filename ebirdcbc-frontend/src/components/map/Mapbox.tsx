@@ -4,7 +4,10 @@ import Map from 'react-map-gl/maplibre'
 import { getSpeciesModeTrackLayers, getTrackLayers } from './tracks'
 import { Checklist, ChecklistResponse, Species } from '@/models/ebird'
 import { useState, useEffect, useCallback } from 'react'
-import { getServerRequest } from '@/networking/server_requests'
+import {
+  getServerRequest,
+  postServerRequest,
+} from '@/networking/server_requests'
 import DeckGL, { IconLayer, PathLayer, PickingInfo, TextLayer } from 'deck.gl'
 import { getCurrentProject } from '../navigation/ProjectSelector'
 import { ChecklistPopupModal } from './ChecklistPopupModal'
@@ -39,6 +42,8 @@ export function Mapbox() {
   const [speciesModeLayers, setSpeciesModeLayers] = useState<
     (PathLayer | IconLayer | TextLayer)[]
   >([])
+  const [totalForCurrentSpecies, setTotalForCurrentSpecies] =
+    useState<number>(0)
 
   useEffect(() => {
     fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
@@ -76,14 +81,45 @@ export function Mapbox() {
       )
       setSpeciesModeLayers(layers)
     }
-  }, [selectedSpecies, openModal, selectedChecklist, checklists, speciesMode])
+  }, [
+    selectedSpecies,
+    openModal,
+    selectedChecklist,
+    checklists,
+    speciesMode,
+    species,
+  ])
 
-  function handleUpdateGroup() {
-    fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
-      const checklists = checklistsAndSpecies.checklists
-      const species = checklistsAndSpecies.species
-      setChecklists(checklists)
-      setSpecies(species)
+  useEffect(() => {
+    if (selectedSpecies) {
+      setTotalForCurrentSpecies(getTotalForSpecies(species, selectedSpecies))
+    }
+  }, [selectedSpecies, species])
+
+  async function handleUpdateGroup(specie: Species, newGroup: number) {
+    const updatedSpecies = species.map((s) =>
+      s.id === specie.id ? { ...s, group_number: newGroup } : s
+    )
+    setSpecies(updatedSpecies)
+
+    const updatedChecklists = checklists.map((checklist) => {
+      const updatedChecklistSpecies = checklist.species.map((s) =>
+        s.id === specie.id ? { ...s, group_number: newGroup } : s
+      )
+      return {
+        ...checklist,
+        species: updatedChecklistSpecies,
+      }
+    })
+    setChecklists(updatedChecklists)
+
+    await updateGroupOfSpecies(specie, newGroup).then(() => {
+      fetchChecklistsAndSpecies().then((checklistsAndSpecies) => {
+        const checklists = checklistsAndSpecies.checklists
+        const species = checklistsAndSpecies.species
+        setChecklists(checklists)
+        setSpecies(species)
+      })
     })
   }
 
@@ -99,6 +135,7 @@ export function Mapbox() {
             selectedSpecies={selectedSpecies}
             setSelectedSpecies={setSelectedSpecies}
             species={species}
+            totalForCurrentSpecies={totalForCurrentSpecies}
           />
         )}
       </div>
@@ -137,7 +174,7 @@ export function Mapbox() {
               selectedChecklist={selectedChecklist}
               setSelectedChecklist={setSelectedChecklist}
               selectedSpecies={selectedSpecies}
-              fetchChecklists={handleUpdateGroup}
+              handleUpdateGroup={handleUpdateGroup}
             />
           )}
         </Map>
@@ -171,4 +208,42 @@ export async function fetchChecklistsAndSpecies() {
     return { checklists: checks, species: specs }
   }
   throw new Error('Failed to fetch checklists')
+}
+
+async function updateGroupOfSpecies(species: Species, group: number) {
+  const projectId = getCurrentProject()?.id
+  if (!projectId) {
+    return
+  }
+  const res = await postServerRequest(
+    `update_species_group?project_id=${projectId}&species_id=${species.id}&new_group=${group}`,
+    {}
+  )
+  if (res.status !== 200) {
+    console.error('Failed to update group of species')
+    throw new Error('Failed to update group of species')
+  }
+}
+
+function getTotalForSpecies(species: Species[], selectedSpecies: string) {
+  const speciesEntries = species.filter(
+    (s) => s.species_name === selectedSpecies
+  )
+
+  const groupedSpecies = speciesEntries.reduce(
+    (groups, species) => {
+      const groupNum = species.group_number
+      if (!groups[groupNum]) {
+        groups[groupNum] = []
+      }
+      groups[groupNum].push(species)
+      return groups
+    },
+    {} as Record<number, Species[]>
+  )
+
+  return Object.values(groupedSpecies).reduce((total, speciesGroup) => {
+    const maxCount = Math.max(...speciesGroup.map((s) => s.count))
+    return total + maxCount
+  }, 0)
 }

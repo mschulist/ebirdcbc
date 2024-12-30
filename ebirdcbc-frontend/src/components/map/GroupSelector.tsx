@@ -2,14 +2,11 @@
 
 import { useState } from 'react'
 import { Checklist, Species } from '@/models/ebird'
-import { getCurrentProject } from '../navigation/ProjectSelector'
-import { postServerRequest } from '@/networking/server_requests'
-
 type GroupSelectorProps = {
   checklist: Checklist
   maxGroups: number
   selectedSpecies: string | undefined
-  fetchChecklists: () => void
+  handleUpdateGroup: (species: Species, newGroup: number) => void
 }
 
 export function GroupSelector(props: GroupSelectorProps) {
@@ -28,11 +25,10 @@ export function GroupSelector(props: GroupSelectorProps) {
   }
 
   const handleGroupClick = (group: number) => {
-    setSelectedGroup(group)
     if (species) {
-      updateGroupOfSpecies(species, group)
+      props.handleUpdateGroup(species, group)
+      setSelectedGroup(group)
     }
-    props.fetchChecklists()
   }
 
   return (
@@ -48,18 +44,4 @@ export function GroupSelector(props: GroupSelectorProps) {
       ))}
     </div>
   )
-}
-
-async function updateGroupOfSpecies(species: Species, group: number) {
-  const projectId = getCurrentProject()?.id
-  if (!projectId) {
-    return
-  }
-  const res = await postServerRequest(
-    `update_species_group?project_id=${projectId}&species_id=${species.id}&new_group=${group}`,
-    {}
-  )
-  if (res.status !== 200) {
-    console.error('Failed to update group of species')
-  }
 }
