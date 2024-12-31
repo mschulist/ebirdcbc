@@ -17,12 +17,13 @@ def create_species_summary(species: List[Species]):
 
     species_list = [specie.model_dump() for specie in species]
 
-    species_df = pl.DataFrame(species_list)
+    # group_number = -1 means that we want to remove that observation
+    species_df = pl.DataFrame(species_list).filter(pl.col("group_number") != -1)
 
     grouped_species = (
         (
             species_df.group_by(["species_code", "group_number"])
-            .agg(pl.col("count").sum())
+            .agg(pl.col("count").max())
             .group_by(["species_code"])
             .agg(pl.col("count").sum())
         )

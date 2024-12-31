@@ -42,6 +42,12 @@ export function GroupSelector(props: GroupSelectorProps) {
           Group {group}
         </button>
       ))}
+      <button
+        onClick={() => handleGroupClick(-1)}
+        className={`btn btn-outline p-2 m-1 ${selectedGroup === -1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+      >
+        Do not count
+      </button>
     </div>
   )
 }

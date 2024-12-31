@@ -33,6 +33,7 @@ export function ProjectSelector() {
               onClick={() => {
                 setProject(project)
                 setCurrentProject(getCurrentProject())
+                window.location.reload()
               }}
             >
               {project.name}

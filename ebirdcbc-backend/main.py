@@ -125,6 +125,8 @@ async def get_checklists_and_species(
     project_id: Annotated[int, Depends(authorize_project_access)],
 ):
     checklists = db.get_checklists_by_project_id(project_id)
+    if len(checklists) == 0:
+        return {"checklists": [], "species": []}
     checklist_ids = [
         checklist.id for checklist in checklists if checklist.id is not None
     ]

@@ -51,7 +51,9 @@ export function Mapbox() {
       const species = checklistsAndSpecies.species
       setChecklists(checklists)
       setSpecies(species)
-      setSelectedSpecies(species[0].species_name)
+      if (species.length > 0) {
+        setSelectedSpecies(species[0].species_name)
+      }
     })
   }, [])
 
@@ -227,7 +229,7 @@ async function updateGroupOfSpecies(species: Species, group: number) {
 
 function getTotalForSpecies(species: Species[], selectedSpecies: string) {
   const speciesEntries = species.filter(
-    (s) => s.species_name === selectedSpecies
+    (s) => s.species_name === selectedSpecies && s.group_number !== -1
   )
 
   const groupedSpecies = speciesEntries.reduce(

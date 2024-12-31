@@ -3,6 +3,7 @@
 import { IconLayer, PathLayer, TextLayer } from '@deck.gl/layers'
 import { Checklist } from '@/models/ebird'
 import distinctColors from 'distinct-colors'
+import chroma from 'chroma-js'
 
 export function getTrackLayers(
   checklists: Checklist[],
@@ -76,6 +77,11 @@ export function getSpeciesModeTrackLayers(
   setSelectedChecklist: (checklist: Checklist) => void
 ) {
   const colors = distinctColors({ count: checklists.length })
+  const colorMap = new Map<number, chroma.Color>()
+  colors.forEach((color, index) => {
+    colorMap.set(index, color.alpha(1))
+  })
+  colorMap.set(-1, chroma([255, 0, 0, 0.5]))
 
   const layers = checklists
     .filter((checklist) =>
@@ -107,7 +113,10 @@ export function getSpeciesModeTrackLayers(
             fontSettings: { sdf: true },
             getText: () => speciesCount?.toString() || '',
             getSize: 32,
-            getColor: colors[speciesGroup].rgb(),
+            getColor: () => {
+              const color = colorMap.get(speciesGroup)?.rgba() || [0, 0, 0, 1]
+              return [color[0], color[1], color[2], color[3] * 255]
+            },
             pickable: true,
             onClick: (pickingInfo) => {
               if (selectedChecklist != null) return
@@ -131,7 +140,10 @@ export function getSpeciesModeTrackLayers(
               )
               return path
             },
-            getColor: colors[speciesGroup].rgb(),
+            getColor: () => {
+              const color = colorMap.get(speciesGroup)?.rgba() || [0, 0, 0, 1]
+              return [color[0], color[1], color[2], color[3] * 255]
+            },
             getWidth: 15,
             pickable: true,
             onClick: (pickingInfo) => {
@@ -163,7 +175,10 @@ export function getSpeciesModeTrackLayers(
             },
             getText: () => speciesCount?.toString() || '',
             getSize: 32,
-            getColor: colors[speciesGroup].rgb(),
+            getColor: () => {
+              const color = colorMap.get(speciesGroup)?.rgba() || [0, 0, 0, 1]
+              return [color[0], color[1], color[2], color[3] * 255]
+            },
             outlineWidth: 2,
             fontSettings: { sdf: true },
           })
