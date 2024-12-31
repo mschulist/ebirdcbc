@@ -13,6 +13,13 @@ export function AddTripReport() {
         Adds every checklist from the trip report to the project. If a checklist
         from the trip report already exists in the project, it will be skipped.
       </p>
+
+      <p className='text-sm text-red-500'>
+        Warning: if the eBird username and password are incorrect, this is
+        undefined behavior and the tracks may not appear on the checklists. We
+        need to sign in under the owner of the checklist to get the tracks.
+      </p>
+
       <input
         type='text'
         placeholder='Trip Report #'
@@ -29,7 +36,9 @@ export function AddTripReport() {
       >
         Add Trip Report
       </button>
-      {success !== null && <p className='text-sm text-center text-secondary'>{success}</p>}
+      {success !== null && (
+        <p className='text-sm text-center text-secondary'>{success}</p>
+      )}
     </div>
   )
 }

@@ -14,7 +14,7 @@ export function getTrackLayers(
   const colors = distinctColors({ count: checklists.length })
 
   const layers = checklists.map((checklist, i) => {
-    if (!checklist.track_points) {
+    if (!checklist.track_points || checklist.track_points.length < 4) {
       return new IconLayer({
         id: `icon-layer-${i}`,
         data: [checklist],
@@ -29,7 +29,7 @@ export function getTrackLayers(
         getColor: colors[i].rgb(),
         getIcon: () => 'marker',
         pickable: true,
-        getSize: 40,
+        getSize: 60,
         onClick: (pickingInfo) => {
           if (selectedChecklist != null) return
           openModal()
@@ -54,7 +54,7 @@ export function getTrackLayers(
         return path
       },
       getColor: colors[i].rgb(),
-      getWidth: 20,
+      getWidth: 12,
       pickable: true,
       onClick: (pickingInfo) => {
         if (selectedChecklist != null) return
@@ -101,7 +101,7 @@ export function getSpeciesModeTrackLayers(
       }
 
       switch (true) {
-        case !checklist.track_points:
+        case !checklist.track_points || checklist.track_points.length < 4:
           return new TextLayer({
             id: `text-layer-${i}`,
             data: [checklist],
@@ -144,7 +144,7 @@ export function getSpeciesModeTrackLayers(
               const color = colorMap.get(speciesGroup)?.rgba() || [0, 0, 0, 1]
               return [color[0], color[1], color[2], color[3] * 255]
             },
-            getWidth: 15,
+            getWidth: 12,
             pickable: true,
             onClick: (pickingInfo) => {
               if (selectedChecklist != null) return
@@ -158,6 +158,7 @@ export function getSpeciesModeTrackLayers(
           const textLayer = new TextLayer({
             id: `text-layer-${i}`,
             data: [checklist],
+            pickable: true,
             getPosition: (check: Checklist) => {
               if (!check.track_points) {
                 return [
@@ -181,6 +182,13 @@ export function getSpeciesModeTrackLayers(
             },
             outlineWidth: 2,
             fontSettings: { sdf: true },
+            onClick: (pickingInfo) => {
+              if (selectedChecklist != null) return
+              openModal()
+              if (pickingInfo && pickingInfo.coordinate) {
+                setSelectedChecklist(checklist)
+              }
+            },
           })
 
           return [pathLayer, textLayer]

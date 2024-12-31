@@ -76,9 +76,7 @@ export function SpeciesPopupModal(props: SpeciesPopupModalProps) {
               <span>{checklistWithSingleSpecies.comments}</span>
             </div>
             {checklistWithSingleSpecies.species[0] &&
-              props.selectedChecklist &&
-              (console.log(checklistWithSingleSpecies.species[0].group_number),
-              (
+              props.selectedChecklist && (
                 <>
                   <GroupSelector
                     maxGroups={NUM_GROUPS}
@@ -90,7 +88,7 @@ export function SpeciesPopupModal(props: SpeciesPopupModalProps) {
                     species={checklistWithSingleSpecies.species[0]}
                   />
                 </>
-              ))}
+              )}
           </div>
         )}
       </div>
