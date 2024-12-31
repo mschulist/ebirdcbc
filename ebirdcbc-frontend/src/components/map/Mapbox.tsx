@@ -126,7 +126,7 @@ export function Mapbox() {
   }
 
   return (
-    <div className='h-5/6 relative'>
+    <div className='relative h-full'>
       <div className='absolute top-2 left-4 z-10 flex space-y-2 gap-4 items-baseline'>
         <SpeciesModeCheckbox
           speciesMode={speciesMode}

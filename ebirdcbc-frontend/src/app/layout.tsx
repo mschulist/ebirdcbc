@@ -17,9 +17,9 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <Auth>
-        <body className='h-screen'>
+        <body className='h-screen overflow-hidden'>
           <Navbar />
-          {children}
+          <div className='overflow-auto h-full'>{children}</div>
         </body>
       </Auth>
     </html>

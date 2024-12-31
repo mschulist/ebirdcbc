@@ -1,11 +1,11 @@
 from datetime import timedelta, datetime
 from typing import Annotated
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import io
-from .lib.models import Token, User, UserResponse
+from .lib.models import Project, Token, User, UserResponse
 from .lib.auth import (
     authenticate_user,
     create_access_token,
@@ -108,16 +108,31 @@ async def my_projects(current_user: Annotated[User, Depends(get_current_user)]):
     return projects
 
 
+@app.post("/update_project")
+async def update_project(
+    project_id: Annotated[int, Depends(authorize_project_access)],
+    project: Project,
+):
+    db.update_project(project)
+
+    return {"message": "successfully updated project"}
+
+
 @app.post("/add_trip_report")
 async def add_trip_report(
     project_id: Annotated[int, Depends(authorize_project_access)],
     trip_report_id: int,
+    background_tasks: BackgroundTasks,
 ):
-    checklists = await get_trip_report_checklists(trip_report_id)
-    project = db.get_project(project_id, True)
-    await add_checklists_information(checklists, project, db)
+    async def add_checks():
+        checklists = await get_trip_report_checklists(trip_report_id)
+        project = db.get_project(project_id, True)
+        await add_checklists_information(checklists, project, db)
+        print("finished adding checklists")
 
-    return {"message": "successfully added checklists"}
+    background_tasks.add_task(add_checks)
+
+    return {"message": "started to add checklists"}
 
 
 @app.get("/get_checklists_and_species")

@@ -48,6 +48,9 @@ export function ProjectSelector() {
 export type Project = {
   name: string
   id: number
+  ebird_username: string
+  // a lie, it's not encrypted on the client side but we need naming to be consistent
+  ebird_encrypted_password?: string
 }
 
 export function getCurrentProject(): Project | null {

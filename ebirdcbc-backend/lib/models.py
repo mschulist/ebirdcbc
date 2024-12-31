@@ -8,7 +8,7 @@ class Checklist(BaseModel):
     checklist_id: str
     location_name: str
     location_coords: List[float]
-    comments: str
+    comments: Optional[str]
     track_points: Optional[List[Tuple[float, float]]]
     datetime: str | None
     num_observers: int
@@ -52,3 +52,8 @@ class Token(BaseModel):
 class UserResponse(BaseModel):
     name: str
     username: str
+
+
+class eBirdCredentials(BaseModel):
+    ebird_username: str
+    ebird_password: str

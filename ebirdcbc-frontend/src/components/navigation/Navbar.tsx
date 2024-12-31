@@ -29,15 +29,19 @@ export function Navbar() {
               onClick={() => router.push('/')}
             />
           </div>
-          <div className='flex gap-4'>
+          <div className='flex justify-end items-center gap-4'>
             <button
               onClick={handleDownloadSummary}
               className='btn hover:bg-purple-500 btn-ghost'
             >
               Download Summary
             </button>
-          </div>
-          <div className='flex justify-end items-center gap-4'>
+            <button
+              onClick={() => router.push('/manage-project')}
+              className='btn hover:bg-purple-500 btn-ghost'
+            >
+              Manage Project
+            </button>
             <ProjectSelector />
             <UserIcon />
           </div>

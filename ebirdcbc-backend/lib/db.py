@@ -1,8 +1,8 @@
 from typing import List
 from supabase import create_client
-from postgrest.types import CountMethod
 from .models import Checklist, Species, User, Project
 from fastapi import HTTPException
+from .ebird_auth import encrypt_password
 
 USERS_TABLE_NAME = "users"
 PROJECTS_TABLE_NAME = "projects"
@@ -72,6 +72,41 @@ class CBCDB:
             ebird_encrypted_password=ebird_password,
         )
 
+    def update_project(self, project: Project):
+        """
+        Updates a project
+
+        If ebird password is passed, then we update the password
+
+        Otherwise we leave the password alone
+        """
+        if project.ebird_encrypted_password is None:
+            updated_project = Project(
+                id=project.id,
+                name=project.name,
+                ebird_username=project.ebird_username,
+                ebird_encrypted_password=None,
+            ).model_dump()
+            del updated_project["ebird_encrypted_password"]
+        else:
+            encrypted_password = encrypt_password(project.ebird_encrypted_password)
+            updated_project = Project(
+                id=project.id,
+                name=project.name,
+                ebird_username=project.ebird_username,
+                ebird_encrypted_password=encrypted_password,
+            ).model_dump()
+
+        data = (
+            self.supabase.table(PROJECTS_TABLE_NAME)
+            .update(updated_project)
+            .eq("id", project.id)
+            .execute()
+            .data
+        )
+        if len(data) == 0:
+            raise ValueError("failed to update ebird credentials")
+
     def add_checklist(self, checklist: Checklist) -> int:
         """
         Adds a checklist to the database.
@@ -91,17 +126,17 @@ class CBCDB:
             raise ValueError("failed to add checklist")
         return data[0]["id"]
 
-    def get_preexisting_checklists_count(self, project_id: int) -> int:
+    def get_preexisting_checklists(self, project_id: int) -> List[dict[str, str]]:
         """
-        Returns the number of checklists under a given project
+        Returns the checklists under a given project
         """
         return (
             self.supabase.table(CHECKLIST_TABLE_NAME)
-            .select("id", count=CountMethod.exact)
+            .select("checklist_id")
             .eq("project_id", project_id)
             .execute()
-            .count
-        ) or 0
+            .data
+        )
 
     def add_species(self, species_list: List[Species]):
         """
@@ -112,6 +147,9 @@ class CBCDB:
             specie = species.model_dump()
             del specie["id"]
             species_data.append(specie)
+
+        if len(species_data) == 0:
+            return
 
         self.supabase.table(SPECIES_TABLE_NAME).insert(species_data).execute()
 

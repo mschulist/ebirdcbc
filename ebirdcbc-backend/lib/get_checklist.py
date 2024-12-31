@@ -26,8 +26,14 @@ async def add_checklists_information(
 
     tracks_map = await get_track(ebird_username, ebird_password, checklist_ids)
 
-    preexisting_checklists = db.get_preexisting_checklists_count(project.id)
-    for i, checklist in enumerate(checklist_ids):
+    preexisting_checklist_ids = [
+        c["checklist_id"] for c in db.get_preexisting_checklists(project.id)
+    ]
+    num_new_checklists = 0
+    for checklist in checklist_ids:
+        if checklist in preexisting_checklist_ids:
+            print(f"skipping checklist id {checklist} b/c it already exists")
+            continue
         checklist_info, location_info = ebird_api_checklist(checklist, api_key)
         track = tracks_map.get(checklist, None)
 
@@ -39,7 +45,7 @@ async def add_checklists_information(
             project_id=project.id,
             location_name=location_info["result"],
             location_coords=[lat, lon],
-            comments=checklist_info["comments"],
+            comments=checklist_info.get("comments", None),
             track_points=track,
             checklist_id=checklist,
             distance_km=checklist_info.get("effortDistanceKm", None),
@@ -58,11 +64,13 @@ async def add_checklists_information(
                     checklist_id=checklist_id,
                     count=specie["howManyAtleast"],
                     comments=specie.get("comments", None),
-                    group_number=i + preexisting_checklists,
+                    group_number=num_new_checklists + len(preexisting_checklist_ids),
                 )
             )
 
         db.add_species(species_list)
+        # if we successfully added the checklist, we increment the number of new checklists
+        num_new_checklists += 1
 
 
 def ebird_api_checklist(checklist_id: str, api_key: str):
