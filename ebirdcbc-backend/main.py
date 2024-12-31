@@ -15,7 +15,7 @@ from .lib.auth import (
 from .lib.db import CBCDB
 from .lib.trip_report import get_trip_report_checklists
 from .lib.get_checklist import add_checklists_information
-from .lib.summary import create_species_summary
+from .lib.summary import create_species_summary, create_effort_summary
 from .lib.taxon import add_order_and_species
 import os
 
@@ -183,8 +183,12 @@ async def get_summary_csv(
 
     summary = create_species_summary(species)
 
+    effort_hrs, effort_kms = create_effort_summary(checklists)
+
     stream = io.StringIO()
     summary.write_csv(stream)
+    stream.write(f"\nParty Hours: {effort_hrs}\nParty Kilometers: {effort_kms}\n")
+
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
     response.headers["Content-Disposition"] = (
         f"attachment; filename=cbc_summary_{project.name}_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.csv"

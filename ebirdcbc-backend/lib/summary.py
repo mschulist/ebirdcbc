@@ -1,5 +1,5 @@
 from typing import List
-from .models import Species
+from .models import Checklist, Species
 import polars as pl
 from pathlib import Path
 
@@ -34,3 +34,18 @@ def create_species_summary(species: List[Species]):
     )
 
     return grouped_species
+
+
+def create_effort_summary(checklists: List[Checklist]):
+    """
+    Given a list of checklists, return the summary of the effort
+
+    Effort is the number of hours spent birding as well as the number of distance traveled
+    """
+    hours = 0.0
+    kms = 0.0
+    for check in checklists:
+        hours += check.duration_hr or 0.0
+        kms += check.distance_km or 0.0
+
+    return hours, kms
