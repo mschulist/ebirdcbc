@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import List
+from typing import Sequence
 from .models import Species
 import polars as pl
 
 
-def add_order_and_species(species: List[Species]):
+def add_order_and_species(species: Sequence[Species]):
     taxon_filepath = Path(__file__).parent.parent / "data" / "eBird_taxonomy_v2024.csv"
 
     taxon = pl.read_csv(taxon_filepath).select(

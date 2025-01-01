@@ -16,9 +16,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 url = os.getenv("SUPABASE_URL") or "test"
-key = os.getenv("SUPABASE_KEY") or "test"
 
-db = CBCDB(url, key)
+db = CBCDB(url)
 
 
 def hash_password(password: str):

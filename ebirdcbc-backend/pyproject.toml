@@ -10,8 +10,10 @@ dependencies = [
     "fastapi[standard]>=0.115.6",
     "playwright>=1.49.1",
     "polars>=1.17.1",
+    "psycopg2-binary>=2.9.10",
     "pydantic>=2.10.4",
     "pyjwt>=2.10.1",
     "requests>=2.32.3",
+    "sqlmodel>=0.0.22",
     "supabase>=2.10.0",
 ]

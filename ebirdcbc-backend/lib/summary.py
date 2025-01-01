@@ -1,10 +1,10 @@
-from typing import List
+from typing import Sequence
 from .models import Checklist, Species
 import polars as pl
 from pathlib import Path
 
 
-def create_species_summary(species: List[Species]):
+def create_species_summary(species: Sequence[Species]):
     """
     Given a list of species, create the output summary
     """
@@ -36,7 +36,7 @@ def create_species_summary(species: List[Species]):
     return grouped_species
 
 
-def create_effort_summary(checklists: List[Checklist]):
+def create_effort_summary(checklists: Sequence[Checklist]):
     """
     Given a list of checklists, return the summary of the effort
 

@@ -9,9 +9,12 @@ import {
 import { ProjectInfo } from './ProjectInfo'
 import { postServerRequest } from '@/networking/server_requests'
 import { AddTripReport } from './AddTripReport'
+import { useRouter } from 'next/navigation'
 
 export function ManageProject() {
   const [project, setProject] = useState<Project | null>(null)
+
+  const router = useRouter()
 
   useEffect(() => {
     const project = getCurrentProject()
@@ -27,6 +30,13 @@ export function ManageProject() {
       )}
       <div className='divider divider-horizontal h-5/6'></div>
       <AddTripReport />
+      <div className='divider divider-horizontal h-5/6'></div>
+      <button
+        className='btn btn-accent'
+        onClick={() => router.push('/create-project')}
+      >
+        Create new project
+      </button>
     </div>
   )
 }

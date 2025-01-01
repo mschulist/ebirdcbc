@@ -14,8 +14,13 @@ export function ChooseProject() {
   const router = useRouter()
 
   useEffect(() => {
-    fetchProjects(router).then((projects) => setProjects(projects))
-  }, [router])
+    fetchProjects(router).then((projects) => {
+      setProjects(projects)
+      if (projects.length === 0) {
+        router.push('/create-project')
+      }
+    })
+  }, [router, projects])
 
   return (
     <div className='dropdown'>

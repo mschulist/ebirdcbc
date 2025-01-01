@@ -7,6 +7,7 @@ export function UserIcon() {
 
   function signOut() {
     localStorage.removeItem('token')
+    localStorage.removeItem('current_project')
     window.location.reload()
   }
 

@@ -43,7 +43,7 @@ export function Login() {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex flex-col items-center justify-center align-middle h-full gap-3'
+      className='flex flex-col items-center justify-center gap-3'
     >
       <input
         type='username'

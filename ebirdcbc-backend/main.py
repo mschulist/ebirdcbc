@@ -5,7 +5,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import io
-from .lib.models import Project, Token, User, UserResponse
+from .lib.models import (
+    CreateProjectRequest,
+    CreateUserRequest,
+    Project,
+    Token,
+    User,
+    UserResponse,
+)
 from .lib.auth import (
     authenticate_user,
     create_access_token,
@@ -17,11 +24,11 @@ from .lib.trip_report import get_trip_report_checklists
 from .lib.get_checklist import add_checklists_information
 from .lib.summary import create_species_summary, create_effort_summary
 from .lib.taxon import add_order_and_species
+from .lib.ebird_auth import encrypt_password
 import os
 
 
 url = os.getenv("SUPABASE_URL") or "test"
-key = os.getenv("SUPABASE_KEY") or "test"
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 180
 
@@ -35,7 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-db = CBCDB(url, key)
+db = CBCDB(url)
 
 
 def authorize_project_access(
@@ -85,17 +92,21 @@ async def read_users_me(
 
 
 @app.post("/add_user")
-async def add_user(name: str, username: str, password: str):
-    hashed_password = hash_password(password)
+async def add_user(user_details: CreateUserRequest):
+    hashed_password = hash_password(user_details.password)
     user = User(
-        id=None,
-        name=name,
-        username=username,
+        name=user_details.name,
+        username=user_details.username,
         hashed_password=hashed_password,
         allowed_project_ids=[],
     )
     db.add_user(user)
-    return {"message": "successfully added user to database", "success": True}
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user_details.username}, expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="Bearer")
 
 
 @app.post("/my_projects")
@@ -108,6 +119,29 @@ async def my_projects(current_user: Annotated[User, Depends(get_current_user)]):
     return projects
 
 
+@app.post("/add_project")
+async def add_project(
+    current_user: Annotated[User, Depends(get_current_user)],
+    new_project: CreateProjectRequest,
+):
+    encrypted_password = encrypt_password(new_project.ebird_password)
+    project = Project(
+        name=new_project.name,
+        ebird_username=new_project.ebird_username,
+        ebird_encrypted_password=encrypted_password,
+    )
+    project_id = db.add_project(project)
+    if current_user.id is None:
+        return HTTPException(status_code=500, detail="User ID cannot be none!")
+    if project_id is None:
+        return HTTPException(status_code=500, detail="Project ID cannot be none!")
+
+    if db.update_allowed_projects(current_user.id, project_id):
+        return {"message": "added project"}
+
+    return HTTPException(status_code=500, detail="Failed to add project")
+
+
 @app.post("/update_project")
 async def update_project(
     project_id: Annotated[int, Depends(authorize_project_access)],
@@ -116,6 +150,20 @@ async def update_project(
     db.update_project(project)
 
     return {"message": "successfully updated project"}
+
+
+@app.post("/add_user_to_project")
+async def add_user_to_project(
+    project_id: Annotated[int, Depends(authorize_project_access)],
+    username_to_add: str,
+):
+    user_to_add = db.get_user(username_to_add)
+    if user_to_add.id is None:
+        raise HTTPException(status_code=500, detail="User ID is None!")
+
+    db.update_allowed_projects(user_to_add.id, project_id)
+
+    return {"message": f"added user {username_to_add} to {project_id}"}
 
 
 @app.post("/add_trip_report")

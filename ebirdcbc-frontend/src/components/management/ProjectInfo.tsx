@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Project } from '../navigation/ProjectSelector'
+import { AddUser } from './AddUser'
 
 type ProjectInfoProps = {
   project: Project
@@ -95,6 +96,8 @@ export function ProjectInfo(props: ProjectInfoProps) {
           {success ? 'Project saved successfully' : 'Failed to save project'}
         </div>
       )}
+      <div className='divider divider-vertical' />
+      <AddUser />
     </div>
   )
 }

@@ -209,7 +209,8 @@ export async function fetchChecklistsAndSpecies() {
     const specs = species as Species[]
     return { checklists: checks, species: specs }
   }
-  throw new Error('Failed to fetch checklists')
+  console.error('Failed to fetch checklists and species')
+  return { checklists: [], species: [] }
 }
 
 async function updateGroupOfSpecies(species: Species, group: number) {

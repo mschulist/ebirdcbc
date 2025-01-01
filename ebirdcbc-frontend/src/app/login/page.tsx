@@ -1,9 +1,9 @@
-import { Login } from '@/components/auth/Login'
+import LoginSignup from '@/components/auth/LoginSignup'
 
 export default function LoginPage() {
   return (
     <div className='h-screen'>
-      <Login />
+      <LoginSignup />
     </div>
   )
 }
