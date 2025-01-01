@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { getCurrentProject } from '../navigation/ProjectSelector'
 import { postServerRequest } from '@/networking/server_requests'
+import { useRouter } from 'next/navigation'
 
 export function AddTripReport() {
   const [tripReportNumber, setTripReportNumber] = useState<string>('')
   const [success, setSuccess] = useState<string | null>(null)
+
+  const router = useRouter()
 
   return (
     <div className='flex flex-col w-1/3 items-center gap-3'>
@@ -39,6 +42,12 @@ export function AddTripReport() {
       {success !== null && (
         <p className='text-sm text-center text-secondary'>{success}</p>
       )}
+      <button
+        onClick={() => router.push('/manage-project/checklists')}
+        className='btn btn-secondary'
+      >
+        View checklists in more detail
+      </button>
     </div>
   )
 }

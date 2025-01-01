@@ -209,3 +209,24 @@ async def get_summary_csv(
         f"attachment; filename=cbc_summary_{project.name}_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.csv"
     )
     return response
+
+
+@app.post("/upsert_checklist")
+async def upsert_checklist(
+    project_id: Annotated[int, Depends(authorize_project_access)],
+    checklist_id: str,
+):
+    """
+    "Re add" a checklist to a project.
+
+    If the checklist is already in the project, we will update it
+    although this will remove all of the species groupings for the checklist
+    that we are updating.
+
+    If the checklist does not exist, we will get the data for it and add it to the
+    database.
+    """
+    _ = db.get_project(project_id)
+    raise HTTPException(
+        status_code=501, detail="Upsert checklist is not yet implemented"
+    )
