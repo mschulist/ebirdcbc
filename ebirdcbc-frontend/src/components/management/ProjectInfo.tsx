@@ -49,7 +49,7 @@ export function ProjectInfo(props: ProjectInfoProps) {
           type='text'
           placeholder='eBird Username'
           className='input w-full'
-          value={props.project.ebird_username}
+          value={ebirdUsername}
           onChange={(e) => setEbirdUsername(e.target.value)}
         />
       </div>
@@ -64,7 +64,7 @@ export function ProjectInfo(props: ProjectInfoProps) {
           type='password'
           placeholder='eBird Password'
           className='input w-full'
-          value={props.project.ebird_encrypted_password || ''}
+          value={ebirdPassword || ''}
           onChange={(e) => setEbirdPassword(e.target.value)}
         />
       </div>
